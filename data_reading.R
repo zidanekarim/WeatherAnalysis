@@ -1,6 +1,5 @@
 library(tidyverse)
 library(lubridate)
-library(viridis)
 
 weather_csv <- read.csv("weather_data.csv", skip = 2)
 colnames(weather_csv) <- c("time", "temperature", "rain", "precipitation", "cloud_coverage")
@@ -9,7 +8,10 @@ weather_clean <- weather_csv %>% drop_na()
 
 sensor_csv <- read.csv("temp_sensor.csv")
 colnames(sensor_csv) <- c("time", "temperature", "humidity")
-sensor_csv$time <- ymd_hm(sensor_csv$time, tz = "America/New_York")
+#sensor_csv$time <- parse_date_time(sensor_csv$time, orders = c("ymd HMS", "ymd HM", "ymd_HMS", "ymd_HM"))
+sensor_csv$time <- mdy_hm(sensor_csv$time, tz = "America/New_York")
+
+#sensor_csv$time <- ymd_hm(sensor_csv$time, tz = "America/New_York")
 sensor_clean <- sensor_csv %>% drop_na()
 
 cloud_daily <- weather_clean %>%
@@ -18,7 +20,7 @@ cloud_daily <- weather_clean %>%
   summarize(mean_cloud = mean(cloud_coverage, na.rm = TRUE))
 
 plot_weather_clouds <- ggplot(cloud_daily, aes(x = date, y = mean_cloud)) +
-  geom_line(size = 1, color = viridis(1, option = "D")) +
+  geom_line(size = 1, color = "navy") + 
   labs(
     title = "Daily Mean Cloud Coverage",
     x = "Date",
@@ -34,7 +36,7 @@ plot_weather_clouds <- ggplot(cloud_daily, aes(x = date, y = mean_cloud)) +
 
 
 plot_rain <- ggplot(weather_clean, aes(x = time, y = rain)) +
-  geom_line(size = 0.8, color = viridis(5, option = "D")[3]) +
+  geom_line(size = 0.8, color = "deepskyblue") +
   labs(
     title = "Time vs. Rainfall",
     x = "Time",
@@ -47,5 +49,33 @@ plot_rain <- ggplot(weather_clean, aes(x = time, y = rain)) +
     axis.title.y = element_text(face = "bold")
   )
 
+plot_outside_temp <- ggplot(weather_clean, aes(x = time, y = temperature)) +
+  geom_line(size = 1, color = "orange2") + 
+  labs(
+    title = "Outside Temperature Over Time",
+    x = "Time",
+    y = "Temperature (°F)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold")
+  )
+
+plot_chamber_temp <- ggplot(sensor_clean, aes(x = time, y = temperature)) +
+  geom_line(size = 1, color = "purple4") +  
+  labs(
+    title = "Chamber Temperature Over Time",
+    x = "Time",
+    y = "Temperature (°F)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold")
+  )
+
 print(plot_weather_clouds)
 print(plot_rain)
+print(plot_outside_temp)
+print(plot_chamber_temp)
