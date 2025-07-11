@@ -2,7 +2,7 @@ library(tidyverse)
 library(lubridate)
 
 weather_csv <- read.csv("weather_data.csv", skip = 2)
-colnames(weather_csv) <- c("time", "temperature", "rain", "precipitation", "cloud_coverage")
+colnames(weather_csv) <- c("time", "temperature",  "cloud_coverage", "rain")
 weather_csv$time <- ymd_hm(weather_csv$time, tz = "America/New_York")
 weather_clean <- weather_csv %>% drop_na()
 
